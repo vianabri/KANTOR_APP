@@ -63,7 +63,6 @@ class RolePermissionSeeder extends Seeder
             'view all kredit lalai',
         ]);
 
-        // Staff = hanya input + lihat data miliknya
         $staff->syncPermissions([
             'manage penagihan',
             'manage kredit lalai',
