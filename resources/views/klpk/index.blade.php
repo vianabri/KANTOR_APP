@@ -5,11 +5,12 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0"><i class="fas fa-user-slash me-2 text-primary"></i>Daftar Anggota KLPK</h4>
-        @can('manage kredit lalai')
+
+        @canany(['klpk.create', 'manage kredit lalai'])
             <a href="{{ route('klpk.create') }}" class="btn btn-primary btn-sm">
                 <i class="fas fa-plus me-1"></i> Tambah Data
             </a>
-        @endcan
+        @endcanany
     </div>
 
     @if (session('success'))
@@ -48,6 +49,7 @@
                         <th width="170">Aksi</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     @forelse($members as $m)
                         <tr>
@@ -57,16 +59,16 @@
                             <td>{{ $m->id_number }}</td>
                             <td>{{ $m->phone_number }}</td>
 
-                            {{-- Kredit Detail --}}
+                            {{-- Data Kredit --}}
                             <td>
                                 {{-- Sisa Pokok --}}
                                 <strong>Rp {{ number_format($m->principal_remaining, 0, ',', '.') }}</strong><br>
 
-                                {{-- Pokok Saat KLPK --}}
+                                {{-- Pokok Awal KLPK --}}
                                 <small class="text-muted">Awal: Rp
                                     {{ number_format($m->principal_start, 0, ',', '.') }}</small><br>
 
-                                {{-- Progress Persentase --}}
+                                {{-- Progres Persentase --}}
                                 @php
                                     $progress =
                                         $m->principal_start > 0
@@ -78,13 +80,12 @@
                                             )
                                             : 0;
                                 @endphp
-
                                 <span class="badge bg-info">{{ $progress }}%</span><br>
 
                                 {{-- Aging --}}
                                 @if ($m->last_payment_date)
                                     <span
-                                        class="badge 
+                                        class="badge
                                 @if ($m->days_aging < 30) bg-success
                                 @elseif($m->days_aging <= 90) bg-warning text-dark
                                 @else bg-danger @endif">
@@ -97,10 +98,10 @@
 
                             <td>{{ $m->officer_in_charge }}</td>
 
-                            {{-- Status Kredit --}}
+                            {{-- Status --}}
                             <td>
                                 <span
-                                    class="badge 
+                                    class="badge
                             @if ($m->status_penagihan == 'Aktif') bg-success
                             @elseif($m->status_penagihan == 'Somasi') bg-warning text-dark
                             @elseif($m->status_penagihan == 'Hukum') bg-danger
@@ -109,31 +110,36 @@
                                 </span>
                             </td>
 
-                            {{-- ACTION BUTTONS --}}
+                            {{-- Aksi (kolom harus SELALU ADA) --}}
                             <td class="text-nowrap">
-                                @can('view all kredit lalai')
+                                {{-- Histori Pembayaran --}}
+                                @canany(['klpk.payment.view', 'view all kredit lalai'])
                                     <a href="{{ route('klpk.payment.history', $m->klpk_id) }}"
                                         class="btn btn-sm btn-outline-primary" title="Histori Pembayaran">
                                         <i class="fas fa-receipt"></i>
                                     </a>
-                                @endcan
+                                @endcanany
 
-                                @can('manage kredit lalai')
+                                {{-- Tindak Lanjut --}}
+                                @canany(['klpk.followup.create', 'manage kredit lalai'])
                                     <a href="{{ route('klpk.followup.create', $m->klpk_id) }}"
                                         class="btn btn-sm btn-outline-warning" title="Tindak Lanjut">
                                         <i class="fas fa-phone"></i>
                                     </a>
+                                @endcanany
 
+                                {{-- Input Pembayaran --}}
+                                @canany(['klpk.payment.create', 'manage kredit lalai'])
                                     <a href="{{ route('klpk.payment.create', $m->klpk_id) }}"
                                         class="btn btn-sm btn-outline-success" title="Input Pembayaran">
                                         <i class="fas fa-money-bill"></i>
                                     </a>
-                                @endcan
+                                @endcanany
                             </td>
-
                         </tr>
                     @empty
                         <tr>
+                            {{-- HARUS sama dengan jumlah kolom thead = 9 --}}
                             <td colspan="9" class="text-center text-muted">Belum ada data KLPK.</td>
                         </tr>
                     @endforelse
@@ -142,25 +148,4 @@
 
         </div>
     </div>
-
 @endsection
-
-
-@push('scripts')
-    <script>
-        $(document).ready(function() {
-            let table = $('#klpkTable').DataTable({
-                pageLength: 10,
-                responsive: true,
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
-                }
-            });
-
-            // Filter Status kolom ke-7
-            $('#filterStatus').on('change', function() {
-                table.column(7).search(this.value).draw();
-            });
-        });
-    </script>
-@endpush
