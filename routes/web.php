@@ -2,20 +2,25 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AtkController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BagianController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\ActivityController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\RiwayatJabatanController;
-use App\Http\Controllers\AtkRekapController;
 use App\Http\Controllers\AtkMasukController;
+use App\Http\Controllers\AtkRekapController;
 use App\Http\Controllers\AtkKeluarController;
-use App\Http\Controllers\AtkController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KlpkMemberController;
+use App\Http\Controllers\KlpkReportController;
+use App\Http\Controllers\KlpkPaymentController;
+use App\Http\Controllers\KlpkFollowupController;
+use App\Http\Controllers\KlpkDashboardController;
 use App\Http\Controllers\PenagihanLapanganController;
-
+use App\Http\Controllers\RiwayatJabatanController;
+use App\Http\Controllers\KreditLalaiHarianController;
 
 /*
 |--------------------------------------------------------------------------
@@ -155,7 +160,8 @@ Route::middleware(['auth'])->group(function () {
     )->name('penagihan.followup.store');
 });
 
-use App\Http\Controllers\KreditLalaiHarianController;
+
+
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/kredit-lalai',              [KreditLalaiHarianController::class, 'index'])->name('kredit-lalai.index');
@@ -164,4 +170,67 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/kredit-lalai/export-excel', [KreditLalaiHarianController::class, 'exportExcel'])->name('kredit-lalai.export.excel');
     Route::get('/kredit-lalai/export-pdf',   [KreditLalaiHarianController::class, 'exportPdf'])->name('kredit-lalai.export.pdf');
+});
+
+
+Route::get('klpk-dashboard', [KlpkDashboardController::class, 'index'])
+    ->middleware('permission:view all kredit lalai')
+    ->name('klpk.dashboard');
+
+
+Route::middleware(['auth', 'permission:manage kredit lalai|view all kredit lalai'])->group(function () {
+
+    Route::resource('klpk', KlpkMemberController::class);
+
+    Route::get('klpk/{klpk_id}/payment', [KlpkPaymentController::class, 'create'])
+        ->middleware('permission:manage kredit lalai')
+        ->name('klpk.payment.create');
+
+    Route::post('klpk/{klpk_id}/payment', [KlpkPaymentController::class, 'store'])
+        ->middleware('permission:manage kredit lalai')
+        ->name('klpk.payment.store');
+
+    Route::get('klpk/{klpk_id}/history', [KlpkPaymentController::class, 'history'])
+        ->middleware('permission:view all kredit lalai')
+        ->name('klpk.payment.history');
+
+    Route::get('klpk/{klpk_id}/history/pdf', [KlpkPaymentController::class, 'historyPdf'])
+        ->middleware('permission:view all kredit lalai')
+        ->name('klpk.payment.history.pdf');
+
+    Route::get('klpk-report', [KlpkMemberController::class, 'report'])
+        ->middleware('permission:view all kredit lalai')
+        ->name('klpk.report.index');
+    Route::get('klpk-followup', [KlpkMemberController::class, 'followUpList'])
+        ->middleware('permission:manage kredit lalai')
+        ->name('klpk.followup');
+
+    Route::get('klpk-report/pdf', [KlpkMemberController::class, 'reportPdf'])
+        ->middleware('permission:view all kredit lalai')
+        ->name('klpk.report.pdf');
+
+    Route::get('klpk-rekap', [KlpkReportController::class, 'monthly'])
+        ->middleware('permission:view all kredit lalai')
+        ->name('klpk.rekap.bulanan');
+
+    Route::get('klpk-rekap/pdf', [KlpkReportController::class, 'monthlyPdf'])
+        ->middleware('permission:view all kredit lalai')
+        ->name('klpk.rekap.pdf');
+
+    Route::get(
+        'klpk/{klpk_id}/followup/create',
+        [KlpkFollowupController::class, 'create']
+    )
+        ->name('klpk.followup.create');
+    Route::get(
+        'klpk/{id}/quickview',
+        [KlpkMemberController::class, 'quickView']
+    )
+        ->name('klpk.quickview');
+
+    Route::post(
+        'klpk/{klpk_id}/followup',
+        [KlpkFollowupController::class, 'store']
+    )
+        ->name('klpk.followup.store');
 });

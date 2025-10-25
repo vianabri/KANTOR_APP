@@ -10,6 +10,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
 
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+
+
     <style>
         :root {
             --sidebar-width: 260px;
@@ -265,6 +268,30 @@
                     </div>
                 @endcan
 
+                {{-- === KLPK SECTION === --}}
+                <a class="d-flex justify-content-between align-items-center p-2 rounded text-decoration-none mb-1
+    {{ request()->is('klpk*') ? 'bg-primary text-white' : 'text-dark' }}"
+                    data-bs-toggle="collapse" href="#collapseKLPK" role="button"
+                    aria-expanded="{{ request()->is('klpk*') ? 'true' : 'false' }}" aria-controls="collapseKLPK">
+
+                    <span><i class="fas fa-user-slash me-2"></i> Data KLPK</span>
+                    <i class="fas fa-chevron-right small rotate {{ request()->is('klpk*') ? 'down' : '' }}"></i>
+                </a>
+
+                <div class="collapse ps-3 {{ request()->is('klpk*') ? 'show' : '' }}" id="collapseKLPK">
+
+                    {{-- Daftar KLPK --}}
+                    <a href="{{ route('klpk.index') }}"
+                        class="d-flex align-items-center p-2 small rounded text-decoration-none mb-1
+        {{ request()->is('klpk') ? 'bg-primary text-white' : 'text-dark' }}">
+                        <i class="fas fa-table me-2 text-secondary"></i> Daftar KLPK
+                    </a>
+                    <a href="{{ route('klpk.rekap.bulanan') }}"
+                        class="d-flex align-items-center p-2 small rounded text-decoration-none mb-1
+         {{ request()->is('klpk-rekap') ? 'bg-primary text-white' : 'text-dark' }}">
+                        <i class="fas fa-folder-open me-2 text-secondary"></i> Rekap Bulanan
+                    </a>
+                </div>
 
 
                 {{-- === KEPEGAWAIAN SECTION === --}}
@@ -333,6 +360,26 @@
                         <i class="fas fa-users-gear me-2 text-secondary"></i> HR
                     </a>
                 </div>
+                @can('view logs')
+                    <a href="{{ route('logs.index') }}" class="d-flex align-items-center p-2 text-dark small mb-1">
+                        <i class="fas fa-history me-2"></i> Log Aktivitas
+                    </a>
+                @endcan
+                @can('manage kredit lalai')
+                    <a href="{{ route('klpk.followup') }}"
+                        class="d-flex align-items-center p-2 small rounded text-decoration-none mb-1
+        {{ request()->is('klpk-followup') ? 'bg-primary text-white' : 'text-dark' }}">
+                        <i class="fas fa-bell text-danger me-2"></i> Follow-Up
+                    </a>
+                @endcan
+
+                @can('view all kredit lalai')
+                    <a href="{{ route('klpk.dashboard') }}"
+                        class="d-flex align-items-center p-2 rounded small text-decoration-none mb-1
+    {{ request()->is('klpk-dashboard') ? 'bg-primary text-white' : 'text-dark' }}">
+                        <i class="fas fa-chart-bar text-secondary me-2"></i> Dashboard KLPK
+                    </a>
+                @endcan
 
                 <!-- System Section -->
                 @role('admin')
@@ -376,7 +423,10 @@
             </footer>
         </div>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -421,6 +471,21 @@
                     const saved = localStorage.getItem("sidebarHidden") === "true";
                     sidebar.classList.toggle("hidden", saved);
                     main.classList.toggle("full", saved);
+                }
+            });
+            document.addEventListener("DOMContentLoaded", function() {
+                const sidebar = document.getElementById("sidebarMenu");
+                const main = document.getElementById("mainContent");
+                const toggleBtn = document.getElementById("sidebarToggle");
+
+                function toggleSidebar() {
+                    if (window.innerWidth < 992) {
+                        sidebar.classList.toggle("show");
+                        return;
+                    }
+                    const hidden = sidebar.classList.toggle("hidden");
+                    main.classList.toggle("full", hidden);
+                    localStorage.setItem("sidebarHidden", hidden ? "true" : "false");
                 }
             });
         });
