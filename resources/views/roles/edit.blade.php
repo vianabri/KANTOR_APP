@@ -3,49 +3,98 @@
 
 @section('content')
     <div class="container-fluid">
+
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold mb-0">Edit Role</h3>
-            <a href="{{ route('roles.index') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-2"></i> Kembali
+            <h3 class="fw-bold text-primary">Edit Role</h3>
+            <a href="{{ route('roles.index') }}" class="btn btn-secondary shadow-sm px-3">
+                <i class="fas fa-arrow-left me-1"></i> Kembali
             </a>
         </div>
 
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
+        <div class="card border-0 shadow-lg rounded-3">
+            <div class="card-body px-4 py-4">
+
                 <form action="{{ route('roles.update', $role->id) }}" method="POST">
                     @csrf
                     @method('PUT')
 
+                    {{-- Nama Role --}}
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Nama Role</label>
+                        <label class="form-label fw-semibold">Nama Role <span class="text-danger">*</span></label>
                         <input type="text" name="name" class="form-control" value="{{ old('name', $role->name) }}"
                             required>
                     </div>
 
+                    {{-- Permissions --}}
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Permission</label>
-                        <div class="row">
-                            @foreach ($permissions as $permission)
-                                <div class="col-md-3 col-sm-6 mb-2">
-                                    <div class="form-check">
-                                        <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
-                                            id="perm_{{ $permission->id }}" class="form-check-input"
-                                            {{ $role->permissions->contains($permission) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="perm_{{ $permission->id }}">
-                                            {{ ucfirst($permission->name) }}
-                                        </label>
+                        <label class="form-label fw-semibold">Hak Akses Role</label>
 
+                        @php
+                            $grouped = $permissions->groupBy(fn($p) => explode(' ', $p->name)[0]);
+                        @endphp
+
+                        @foreach ($grouped as $group => $perms)
+                            <div class="card border-0 shadow-sm mb-3">
+                                <div
+                                    class="card-header bg-light fw-semibold d-flex justify-content-between align-items-center">
+                                    {{ strtoupper($group) }}
+                                    <button type="button" class="btn btn-sm btn-link text-primary check-all"
+                                        data-group="{{ $group }}">
+                                        Pilih Semua
+                                    </button>
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="row">
+                                        @foreach ($perms as $permission)
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <div class="form-check">
+                                                    <input type="checkbox" name="permissions[]"
+                                                        class="form-check-input permission-checkbox"
+                                                        value="{{ $permission->name }}" data-group="{{ $group }}"
+                                                        id="perm_{{ $permission->id }}"
+                                                        {{ $role->permissions->contains($permission) ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="perm_{{ $permission->id }}">
+                                                        {{ ucfirst(str_replace('_', ' ', $permission->name)) }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        @endforeach
                                     </div>
                                 </div>
-                            @endforeach
-                        </div>
+                            </div>
+                        @endforeach
+
                     </div>
 
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save me-2"></i> Perbarui
-                    </button>
+                    <div class="d-flex justify-content-end pt-3">
+                        <button type="submit" class="btn btn-success px-4 rounded-3">
+                            <i class="fas fa-save me-1"></i> Perbarui
+                        </button>
+                    </div>
+
                 </form>
+
             </div>
         </div>
     </div>
 @endsection
+
+
+{{-- ✅ Script — Pilih Semua Per Group --}}
+@push('scripts')
+    <script>
+        document.querySelectorAll('.check-all').forEach(button => {
+            button.addEventListener('click', function() {
+                let group = this.dataset.group;
+                let checkboxes = document.querySelectorAll(
+                    `.permission-checkbox[data-group="${group}"]`
+                );
+                let allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+                checkboxes.forEach(cb => cb.checked = !allChecked);
+                this.textContent = allChecked ? 'Pilih Semua' : 'Batal';
+            });
+        });
+    </script>
+@endpush

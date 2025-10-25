@@ -74,13 +74,17 @@
                             <i class="fas fa-save me-1"></i> Simpan
                         </button>
                     </div>
+
                 </form>
 
             </div>
         </div>
     </div>
+@endsection
 
-    {{-- Select All per Group Script --}}
+
+{{-- ✅ Script Dipindah ke Stack JS --}}
+@push('scripts')
     <script>
         document.querySelectorAll('.check-all').forEach(button => {
             button.addEventListener('click', function() {
@@ -95,5 +99,4 @@
             });
         });
     </script>
-
-@endsection
+@endpush

@@ -295,7 +295,7 @@
 
 
                 {{-- === KEPEGAWAIAN SECTION === --}}
-                @canany(['view pegawai', 'manage pegawai', 'view jabatan', 'view bagian'])
+                @can(['view pegawai', 'manage pegawai', 'view jabatan', 'view bagian'])
                     <h6 class="text-muted text-uppercase small mt-4">Kepegawaian</h6>
 
                     <a class="d-flex justify-content-between align-items-center p-2 rounded text-decoration-none mb-1
@@ -311,31 +311,31 @@
                     <div class="collapse ps-3 {{ request()->is('pegawai*') || request()->is('bagian*') || request()->is('jabatan*') ? 'show' : '' }}"
                         id="collapseKepegawaian">
 
-                        @canany(['view pegawai', 'manage pegawai'])
+                        @can(['view pegawai', 'manage pegawai'])
                             <a href="{{ route('pegawai.index') }}"
                                 class="d-flex align-items-center p-2 rounded text-decoration-none small mb-1
                 {{ request()->is('pegawai*') ? 'bg-primary text-white' : 'text-dark' }}">
                                 <i class="fas fa-id-badge me-2 text-secondary"></i> Pegawai
                             </a>
-                        @endcanany
+                        @endcan
 
-                        @canany(['view bagian', 'manage bagian'])
+                        @can(['view bagian', 'manage bagian'])
                             <a href="{{ route('bagian.index') }}"
                                 class="d-flex align-items-center p-2 rounded text-decoration-none small mb-1
                 {{ request()->is('bagian*') ? 'bg-primary text-white' : 'text-dark' }}">
                                 <i class="fas fa-layer-group me-2 text-secondary"></i> Bagian
                             </a>
-                        @endcanany
+                        @endcan
 
-                        @canany(['view jabatan', 'manage jabatan'])
+                        @can(['view jabatan', 'manage jabatan'])
                             <a href="{{ route('jabatan.index') }}"
                                 class="d-flex align-items-center p-2 rounded text-decoration-none small mb-1
                 {{ request()->is('jabatan*') ? 'bg-primary text-white' : 'text-dark' }}">
                                 <i class="fas fa-briefcase me-2 text-secondary"></i> Jabatan
                             </a>
-                        @endcanany
+                        @endcan
                     </div>
-                @endcanany
+                @endcan
 
                 <h6 class="text-muted text-uppercase small mt-4">Reports</h6>
 
@@ -399,10 +399,6 @@
                         <a href="{{ url('/roles') }}"
                             class="d-flex align-items-center p-2 rounded text-decoration-none text-dark small mb-1">
                             <i class="fas fa-user-gear me-2 text-secondary"></i> Roles
-                        </a>
-                        <a href="{{ url('/permissions') }}"
-                            class="d-flex align-items-center p-2 rounded text-decoration-none text-dark small mb-1">
-                            <i class="fas fa-key me-2 text-secondary"></i> Permissions
                         </a>
                     </div>
                 @endrole
@@ -490,6 +486,7 @@
             });
         });
     </script>
+    @stack('scripts')
 </body>
 
 </html>

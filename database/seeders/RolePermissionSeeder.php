@@ -11,22 +11,35 @@ class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Reset Permission Cache
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // 📌 Permissions lengkap seluruh modul
+        // ✅ Permission Modules
+        // ✅ Permission Modules + Action Granular
         $permissions = [
-
-            // Users & Roles
+            // User & Role Management
             'manage users',
             'manage roles',
             'manage permissions',
 
-            // Logs
+            // Audit
             'view logs',
 
-            // Inventaris ATK
-            'manage atk',
+            // KLPK MODULE ACCESS
+            'klpk.view',
+            'klpk.dashboard.view',
+
+            // KLPK ACTIONS
+            'klpk.create',
+            'klpk.edit',
+            'klpk.delete',
+
+            // KLPK PAYMENTS ACTIONS
+            'klpk.payment.view',
+            'klpk.payment.create',
+
+            // KLPK FOLLOWUP ACTIONS
+            'klpk.followup.view',
+            'klpk.followup.create',
 
             // Penagihan Lapangan
             'manage penagihan',
@@ -44,34 +57,60 @@ class RolePermissionSeeder extends Seeder
             ]);
         }
 
-        // 📌 Roles
-        $admin       = Role::firstOrCreate(['name' => 'admin']);
-        $supervisor  = Role::firstOrCreate(['name' => 'supervisor']);
-        $staff       = Role::firstOrCreate(['name' => 'staff']);
-        $viewer      = Role::firstOrCreate(['name' => 'viewer']);
+        // ✅ Roles
+        $admin      = Role::firstOrCreate(['name' => 'admin']);
+        $supervisor = Role::firstOrCreate(['name' => 'supervisor']);
+        $staff      = Role::firstOrCreate(['name' => 'staff']);
+        $viewer     = Role::firstOrCreate(['name' => 'viewer']);
 
-        // ✅ Assign Permissions
-
-        // Admin = semua akses
+        // ✅ Role Permissions
         $admin->syncPermissions(Permission::all());
 
-        // Supervisor = melihat semua data
         $supervisor->syncPermissions([
+            'klpk.view',
+            'klpk.dashboard.view',
+            'klpk.create',
+            'klpk.edit',
+            'klpk.delete',
+            'klpk.payment.view',
+            'klpk.payment.create',
+            'klpk.followup.view',
+            'klpk.followup.create',
+
             'manage penagihan',
             'view all penagihan',
             'manage kredit lalai',
             'view all kredit lalai',
+            'view logs',
         ]);
 
         $staff->syncPermissions([
+            'view klpk',
+            'manage klpk',
+            'manage klpk followup',
+            'manage klpk payments',
+
             'manage penagihan',
             'manage kredit lalai',
         ]);
 
-        // Viewer = hanya lihat Dashboard
-        $viewer->syncPermissions([]);
+        $viewer->syncPermissions([
+            'klpk.view',
+            'klpk.payment.view',
+            'klpk.payment.create',
+            'klpk.followup.view',
+            'klpk.followup.create',
+            'klpk.edit', // hanya untuk miliknya (dibatasi query)
+            'manage penagihan',
+            'manage kredit lalai',
+        ]);
 
-        // Opsional: User pertama jadi admin
+        $viewer->syncPermissions([
+            'klpk.view',
+            'klpk.dashboard.view',
+        ]);
+
+        // ✅ User pertama otomatis Admin
         if ($first = \App\Models\User::first()) {
             $first->assignRole('admin');
         }
